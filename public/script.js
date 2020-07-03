@@ -1,6 +1,8 @@
 let socket = io();
 let data = [];
 
+let pointer = 0;
+
 function getOnline() {
     socket.emit('getUsers');
 }
@@ -9,9 +11,25 @@ function redraw() {
     $(".data").empty();
     let i = 0;
     data.forEach(item => {
-        $(".data").append('<li class="list-group-item" id="item_' + i + '">' + item + '</li>');
+        if (i == pointer) {
+            $(".data").append('<li class="list-group-item bg-light" id="item_' + i + '">' + item + '</li>');
+        } else {
+            $(".data").append('<li class="list-group-item" id="item_' + i + '">' + item + '</li>');
+        }
         i++;
     });
+}
+
+function draw() {
+    $(".name").text(data[pointer]);
+    let round = pointer;
+    round++;
+    if (round >= data.length) {
+        round = 0;
+    }
+
+    $(".subname").text(data[round]);
+    redraw();
 }
 
 function loadPreset() {
@@ -22,6 +40,26 @@ function addPlayer(event) {
     event.preventDefault();
     const input = $(".form-control").val();
     socket.emit('addPlayer', input);
+    $(".form-control").val('');
+}
+
+function nextRound() {
+    socket.emit('nextRound');
+}
+function prevRound() {
+    socket.emit('prevRound');
+}
+
+function deletePreset() {
+    socket.emit('deletePreset');
+}
+
+function savePreset() {
+    let dataIn = [];
+    $('.data li').each(function () {
+        dataIn.push($(this)[0].textContent);
+    });
+    socket.emit('savePreset', dataIn);
 }
 
 $(() => {
@@ -38,11 +76,12 @@ $(() => {
     });
     $(".data").disableSelection();
 });
-getOnline();
 $('.toast').toast();
+getOnline();
 
 
 socket.on('connected', (d) => {
+    draw();
     $('#loading').prop('hidden', true);
     data = d;
     redraw();
@@ -50,7 +89,7 @@ socket.on('connected', (d) => {
 
 socket.on('updatedData', (d) => {
     data = d;
-    redraw();
+    draw();
 });
 
 socket.on('userCount', (count) => {
@@ -73,7 +112,18 @@ socket.on('success', (str) => {
     $('.toast').toast('show');
 });
 
+socket.on('roundNext', (p) => {
+    pointer = p;
+    draw();
+});
 
+socket.on('roundPrev', (p) => {
+    pointer = p;
+    draw();
+});
 
-
+socket.on('round', (r) => {
+    pointer = r;
+    draw();
+});
 

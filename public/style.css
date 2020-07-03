@@ -1,3 +1,10 @@
+#sticky-footer {
+  position: fixed;
+  height: 70px;
+  bottom: 0;
+  width: 100%;
+}
+
 li:hover {
   cursor: grab;
 }
@@ -21,4 +28,24 @@ ul {
   top: 100vh;
   transform: translate(-50%, 90vh);
   z-index: 9999;
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+}
+
+.canvas {
+  margin-top: 3vh;
+  display: flex;
+  justify-content: center;
+}
+
+.name {
+  font-size: 110pt;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
 }

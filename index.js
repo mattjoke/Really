@@ -18,18 +18,13 @@ let preset = [
     "Gabriel"
 ];
 
-let data = [
-    "Darastrix",
-    "Pedigis",
-    "Shelly",
-    "Fluffy Sunshine",
-    "Gabriel"
-];
+let data = [];
 
 let online = 0;
+let round = 0;
 
 io.on('connection', (socket) => {
-    console.log("User has connected to web page" + socket.id)
+    console.log("User has connected to web page" + socket.id);
     socket.emit('connected', data);
     online++;
     socket.on('disconnect', () => {
@@ -38,6 +33,8 @@ io.on('connection', (socket) => {
         io.emit('userCount', online);
     });
 
+    console.log("Number of online users " + online);
+    socket.emit('round', round);
 
     io.emit('userCount', online);
     socket.on('updateData', (d) => {
@@ -51,7 +48,6 @@ io.on('connection', (socket) => {
     });
 
     socket.on('addPlayer', (input) => {
-        console.log(data);
         if (input == '') {
             socket.emit('inputError', 'Input is empty');
             return;
@@ -70,12 +66,50 @@ io.on('connection', (socket) => {
         socket.emit('userCount', online);
     });
     socket.on('getPreset', () => {
+        console.log("PRESERT");
+        console.log(data);
+        console.log(preset);
         data = preset;
+        round = 0;
+        io.emit('round', round);
         io.emit('updatedData', data);
     });
     socket.on('getData', () => {
         io.emit('updatedData', data);
     });
+
+    socket.on('nextRound', () => {
+        round++;
+        if (round >= data.length) {
+            round = 0;
+        }
+        io.emit('roundNext', round);
+    });
+    socket.on('prevRound', () => {
+        round--;
+        if (round < 0) {
+            round = data.length - 1;
+        }
+        io.emit('roundPrev', round);
+    });
+
+    socket.on('savePreset', (data) => {
+        if (data.length == 0) {
+            socket.emit('inputError', "Can't save empty data");
+            return;
+        }
+        preset = data;
+        socket.emit('success', 'Preset is sucessfully saved');
+    });
+
+    socket.on('deletePreset', () => {
+        if (preset == []) {
+            socket.emit('inputError', 'Preset is already empty');
+            return;
+        }
+        preset = [];
+        socket.emit('success', 'Preset is deleted');
+    })
 });
 
 

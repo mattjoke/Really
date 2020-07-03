@@ -24,16 +24,13 @@ let online = 0;
 let round = 0;
 
 io.on('connection', (socket) => {
-    console.log("User has connected to web page" + socket.id);
     socket.emit('connected', data);
     online++;
     socket.on('disconnect', () => {
-        console.log("User has disconnected to web page" + socket.id)
         online--;
         io.emit('userCount', online);
     });
 
-    console.log("Number of online users " + online);
     socket.emit('round', round);
 
     io.emit('userCount', online);
@@ -66,9 +63,6 @@ io.on('connection', (socket) => {
         socket.emit('userCount', online);
     });
     socket.on('getPreset', () => {
-        console.log("PRESERT");
-        console.log(data);
-        console.log(preset);
         data = preset;
         round = 0;
         io.emit('round', round);
